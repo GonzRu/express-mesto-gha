@@ -1,3 +1,3 @@
 module.exports.signIn = (req, res) => {
-  res.send({token: 'aaaaaaaaaaaa'});
+  res.send({ token: 'aaaaaaaaaaaa' });
 };

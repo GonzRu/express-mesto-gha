@@ -9,17 +9,15 @@ const app = express();
 
 mongoose.connect('mongodb://localhost:27017/mesto');
 
-app.use(cors())
+app.use(cors());
 app.use(require('./midlewares/auth'));
-app.use(require('body-parser').json())
-app.use(require('./routes/auth'))
-app.use(require('./routes/users'))
-app.use(require('./routes/cards'))
-app.use(require('./midlewares/notFound'))
+app.use(require('body-parser').json());
+app.use(require('./routes/auth'));
+app.use(require('./routes/users'));
+app.use(require('./routes/cards'));
+app.use(require('./midlewares/notFound'));
 
-app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}`)
-})
+app.listen(PORT);
 
 process.on('uncaughtException', (err, origin) => {
   console.log(`${origin} ${err.name} c текстом ${err.message} не была обработана. Обратите внимание!`);
