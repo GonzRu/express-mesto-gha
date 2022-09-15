@@ -1,3 +1,3 @@
 module.exports = (req, res) => {
-  res.status(404).send();
+  res.status(404).send({message: 'Endpoint not found'});
 };
