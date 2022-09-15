@@ -7,5 +7,11 @@ module.exports = (err, res) => {
     return;
   }
 
+  if (err instanceof mongoose.Error.CastError) {
+    res.status(400).send({ message: err.message });
+
+    return;
+  }
+
   res.status(500).send({ message: `Произошла ошибка: ${err}` });
 };
