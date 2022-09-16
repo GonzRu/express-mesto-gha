@@ -5,6 +5,10 @@ const process = require('process');
 
 const { PORT = 3000 } = process.env;
 
+process.on('uncaughtException', (err, origin) => {
+  console.log(`${origin} ${err.name} c текстом ${err.message} не была обработана. Обратите внимание!`);
+});
+
 const app = express();
 
 mongoose.connect('mongodb://localhost:27017/mesto');
@@ -24,7 +28,3 @@ app.use(require('./routes/cards'));
 app.use(require('./midlewares/notFound'));
 
 app.listen(PORT);
-
-process.on('uncaughtException', (err, origin) => {
-  console.log(`${origin} ${err.name} c текстом ${err.message} не была обработана. Обратите внимание!`);
-});

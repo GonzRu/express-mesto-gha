@@ -1,11 +1,11 @@
+const mongoose = require('mongoose');
 const User = require('../models/user');
-const errorHandler = require('../utils/errorHandler');
 const responseHandler = require('../utils/responseHandler');
 
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch((err) => errorHandler(err, res));
+    .catch((err) => res.status(500).send({ message: `Произошла ошибка: ${err}` }));
 };
 
 module.exports.getUser = (req, res) => {
@@ -13,7 +13,15 @@ module.exports.getUser = (req, res) => {
 
   User.findById(id)
     .then((user) => responseHandler(user, res))
-    .catch((err) => errorHandler(err, res));
+    .catch((err) => {
+      if (err instanceof mongoose.Error.CastError) {
+        res.status(400).send({ message: err.message });
+
+        return;
+      }
+
+      res.status(500).send({ message: `Произошла ошибка: ${err}` });
+    });
 };
 
 module.exports.createUser = (req, res) => {
@@ -21,14 +29,22 @@ module.exports.createUser = (req, res) => {
 
   User.create({ name, about, avatar })
     .then((user) => res.send(user))
-    .catch((err) => errorHandler(err, res));
+    .catch((err) => {
+      if (err instanceof mongoose.Error.ValidationError) {
+        res.status(400).send({ message: err.message });
+
+        return;
+      }
+
+      res.status(500).send({ message: `Произошла ошибка: ${err}` });
+    });
 };
 
 module.exports.getMe = (req, res) => {
   const id = req.user._id;
   User.findById(id)
     .then((user) => res.send(user))
-    .catch((err) => errorHandler(err, res));
+    .catch((err) => res.status(500).send({ message: `Произошла ошибка: ${err}` }));
 };
 
 module.exports.update = (req, res) => {
@@ -39,12 +55,20 @@ module.exports.update = (req, res) => {
     id,
     { name, about },
     {
-      new: true, // обработчик then получит на вход обновлённую запись
-      runValidators: true, // данные будут валидированы перед изменением
+      new: true,
+      runValidators: true,
     },
   )
     .then((user) => res.send(user))
-    .catch((err) => errorHandler(err, res));
+    .catch((err) => {
+      if (err instanceof mongoose.Error.ValidationError) {
+        res.status(400).send({ message: err.message });
+
+        return;
+      }
+
+      res.status(500).send({ message: `Произошла ошибка: ${err}` });
+    });
 };
 
 module.exports.updateAvatar = (req, res) => {
@@ -55,10 +79,18 @@ module.exports.updateAvatar = (req, res) => {
     id,
     { avatar },
     {
-      new: true, // обработчик then получит на вход обновлённую запись
-      runValidators: true, // данные будут валидированы перед изменением
+      new: true,
+      runValidators: true,
     },
   )
     .then((user) => res.send(user))
-    .catch((err) => errorHandler(err, res));
+    .catch((err) => {
+      if (err instanceof mongoose.Error.ValidationError) {
+        res.status(400).send({ message: err.message });
+
+        return;
+      }
+
+      res.status(500).send({ message: `Произошла ошибка: ${err}` });
+    });
 };

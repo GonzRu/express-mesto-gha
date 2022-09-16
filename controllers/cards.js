@@ -1,13 +1,11 @@
+const mongoose = require('mongoose');
 const Card = require('../models/card');
-const errorHandler = require('../utils/errorHandler');
 const responseHandler = require('../utils/responseHandler');
 
 module.exports.getCards = (req, res) => {
   Card.find({})
-    .populate('owner')
-    .populate('likes')
     .then((cards) => res.send(cards))
-    .catch((err) => errorHandler(err, res));
+    .catch((err) => res.status(500).send({ message: `Произошла ошибка: ${err}` }));
 };
 
 module.exports.createCard = (req, res) => {
@@ -16,7 +14,15 @@ module.exports.createCard = (req, res) => {
 
   Card.create({ name, link, owner: userId })
     .then((card) => res.send(card))
-    .catch((err) => errorHandler(err, res));
+    .catch((err) => {
+      if (err instanceof mongoose.Error.ValidationError) {
+        res.status(400).send({ message: err.message });
+
+        return;
+      }
+
+      res.status(500).send({ message: `Произошла ошибка: ${err}` });
+    });
 };
 
 module.exports.deleteCard = (req, res) => {
@@ -24,7 +30,15 @@ module.exports.deleteCard = (req, res) => {
 
   Card.findByIdAndRemove(id)
     .then((user) => responseHandler(user, res))
-    .catch((err) => errorHandler(err, res));
+    .catch((err) => {
+      if (err instanceof mongoose.Error.CastError) {
+        res.status(400).send({ message: err.message });
+
+        return;
+      }
+
+      res.status(500).send({ message: `Произошла ошибка: ${err}` });
+    });
 };
 
 module.exports.likeCard = (req, res) => {
@@ -34,7 +48,15 @@ module.exports.likeCard = (req, res) => {
     { new: true },
   )
     .then((user) => responseHandler(user, res))
-    .catch((err) => errorHandler(err, res));
+    .catch((err) => {
+      if (err instanceof mongoose.Error.CastError) {
+        res.status(400).send({ message: err.message });
+
+        return;
+      }
+
+      res.status(500).send({ message: `Произошла ошибка: ${err}` });
+    });
 };
 
 module.exports.dislikeCard = (req, res) => {
@@ -44,5 +66,13 @@ module.exports.dislikeCard = (req, res) => {
     { new: true },
   )
     .then((user) => responseHandler(user, res))
-    .catch((err) => errorHandler(err, res));
+    .catch((err) => {
+      if (err instanceof mongoose.Error.CastError) {
+        res.status(400).send({ message: err.message });
+
+        return;
+      }
+
+      res.status(500).send({ message: `Произошла ошибка: ${err}` });
+    });
 };
