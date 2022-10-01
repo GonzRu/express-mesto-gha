@@ -114,12 +114,12 @@ module.exports.login = (req, res) => {
       const token = jwt.sign(
         { _id: user._id },
         'some-secret-key',
-        { expiresIn: 3600 }, // токен будет просрочен через час после создания
+        { expiresIn: 3600 },
       );
 
       return res
-        .cookie('jwt', token, { maxAge: 3600000, httpOnly: true })
-        .send(user);
+        // .cookie('jwt', token, { maxAge: 3600000 * 7, httpOnly: true, sameSite: true })
+        .send({ token });
     })
     .catch(() => {
       res.status(401).send({ message: 'Неправильные почта или пароль' });
