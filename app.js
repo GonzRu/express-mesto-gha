@@ -22,7 +22,6 @@ app.use((req, res, next) => {
   next();
 });
 app.use(require('body-parser').json());
-app.use(require('./routes/auth'));
 app.use(require('./routes/users'));
 app.use(require('./routes/cards'));
 app.use(require('./midlewares/notFound'));
