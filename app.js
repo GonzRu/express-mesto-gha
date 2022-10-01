@@ -28,5 +28,6 @@ app.use(require('./midlewares/auth'));
 app.use(require('./routes/users'));
 app.use(require('./routes/cards'));
 app.use(require('./midlewares/notFound'));
+app.use(require('./midlewares/errors'));
 
 app.listen(PORT);

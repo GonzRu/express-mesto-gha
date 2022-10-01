@@ -1,32 +1,23 @@
-const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const responseHandler = require('../utils/responseHandler');
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch((err) => res.status(500).send({ message: `Произошла ошибка: ${err}` }));
+    .catch(next);
 };
 
-module.exports.getUser = (req, res) => {
+module.exports.getUser = (req, res, next) => {
   const { id } = req.params;
 
   User.findById(id)
     .then((user) => responseHandler(user, res))
-    .catch((err) => {
-      if (err instanceof mongoose.Error.CastError) {
-        res.status(400).send({ message: err.message });
-
-        return;
-      }
-
-      res.status(500).send({ message: `Произошла ошибка: ${err}` });
-    });
+    .catch(next);
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name = 'Жак-Ив Кусто',
     about = 'Исследователь',
@@ -40,25 +31,17 @@ module.exports.createUser = (req, res) => {
       name, about, avatar, email, password: hash,
     }))
     .then((user) => res.send(user))
-    .catch((err) => {
-      if (err instanceof mongoose.Error.ValidationError) {
-        res.status(400).send({ message: err.message });
-
-        return;
-      }
-
-      res.status(500).send({ message: `Произошла ошибка: ${err.message}` });
-    });
+    .catch(next);
 };
 
-module.exports.getMe = (req, res) => {
+module.exports.getMe = (req, res, next) => {
   const id = req.user._id;
   User.findById(id)
     .then((user) => res.send(user))
-    .catch((err) => res.status(500).send({ message: `Произошла ошибка: ${err}` }));
+    .catch(next);
 };
 
-module.exports.update = (req, res) => {
+module.exports.update = (req, res, next) => {
   const id = req.user._id;
   const { name, about } = req.body;
 
@@ -71,18 +54,10 @@ module.exports.update = (req, res) => {
     },
   )
     .then((user) => res.send(user))
-    .catch((err) => {
-      if (err instanceof mongoose.Error.ValidationError) {
-        res.status(400).send({ message: err.message });
-
-        return;
-      }
-
-      res.status(500).send({ message: `Произошла ошибка: ${err}` });
-    });
+    .catch(next);
 };
 
-module.exports.updateAvatar = (req, res) => {
+module.exports.updateAvatar = (req, res, next) => {
   const id = req.user._id;
   const { avatar } = req.body;
 
@@ -95,18 +70,10 @@ module.exports.updateAvatar = (req, res) => {
     },
   )
     .then((user) => res.send(user))
-    .catch((err) => {
-      if (err instanceof mongoose.Error.ValidationError) {
-        res.status(400).send({ message: err.message });
-
-        return;
-      }
-
-      res.status(500).send({ message: `Произошла ошибка: ${err}` });
-    });
+    .catch(next);
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   User.findUserByCredentials(email, password)
@@ -121,7 +88,5 @@ module.exports.login = (req, res) => {
         // .cookie('jwt', token, { maxAge: 3600000 * 7, httpOnly: true, sameSite: true })
         .send({ token });
     })
-    .catch(() => {
-      res.status(401).send({ message: 'Неправильные почта или пароль' });
-    });
+    .catch(next);
 };

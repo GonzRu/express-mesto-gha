@@ -1,7 +1,8 @@
+const NotFoundError = require('../errors/not-found-error');
+
 module.exports = (data, res) => {
   if (!data) {
-    res.status(404).send({ message: 'Object not found' });
-    return;
+    throw new NotFoundError('Object not found');
   }
 
   res.send(data);
