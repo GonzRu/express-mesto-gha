@@ -24,8 +24,8 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-app.post('/signup', ...createUser);
-app.post('/signin', ...login);
+app.post('/signup', createUser);
+app.post('/signin', login);
 
 app.use(require('./midlewares/auth'));
 

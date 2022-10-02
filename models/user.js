@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const WrongLoginOrPasswordError = require('../errors/wrong-login-or-password-error');
+const { linkValidator } = require('../utils/validators');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -18,7 +19,7 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
     required: true,
-    match: /(https|http):\/\/(www)?[\w\-._~:/?#[\]@!$&'()*+,;=]+/,
+    match: linkValidator,
   },
   email: {
     type: String,
