@@ -18,6 +18,7 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
     required: true,
+    match: /(https|http):\/\/(www)?[\w\-._~:/?#[\]@!$&'()*+,;=]+/,
   },
   email: {
     type: String,
