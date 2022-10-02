@@ -10,13 +10,20 @@ module.exports.getUsers = (req, res, next) => {
     .catch(next);
 };
 
-module.exports.getUser = (req, res, next) => {
-  const { id } = req.params;
+module.exports.getUser = [
+  celebrate({
+    params: {
+      id: Joi.string().length(24),
+    },
+  }),
+  (req, res, next) => {
+    const { id } = req.params;
 
-  User.findById(id)
-    .then((user) => responseHandler(user, res))
-    .catch(next);
-};
+    User.findById(id)
+      .then((user) => responseHandler(user, res))
+      .catch(next);
+  },
+];
 
 module.exports.createUser = [
   celebrate({
@@ -63,37 +70,57 @@ module.exports.getMe = (req, res, next) => {
     .catch(next);
 };
 
-module.exports.update = (req, res, next) => {
-  const id = req.user._id;
-  const { name, about } = req.body;
-
-  User.findByIdAndUpdate(
-    id,
-    { name, about },
-    {
-      new: true,
-      runValidators: true,
+module.exports.update = [
+  celebrate({
+    params: {
+      id: Joi.string().length(24),
     },
-  )
-    .then((user) => res.send(user))
-    .catch(next);
-};
+    body: Joi.object().keys({
+      name: Joi.string().min(2).max(30),
+      about: Joi.string().min(2).max(30),
+    }),
+  }),
+  (req, res, next) => {
+    const id = req.user._id;
+    const { name, about } = req.body;
 
-module.exports.updateAvatar = (req, res, next) => {
-  const id = req.user._id;
-  const { avatar } = req.body;
+    User.findByIdAndUpdate(
+      id,
+      { name, about },
+      {
+        new: true,
+        runValidators: true,
+      },
+    )
+      .then((user) => res.send(user))
+      .catch(next);
+  },
+];
 
-  User.findByIdAndUpdate(
-    id,
-    { avatar },
-    {
-      new: true,
-      runValidators: true,
-    },
-  )
-    .then((user) => res.send(user))
-    .catch(next);
-};
+module.exports.updateAvatar = [
+  celebrate({
+    body: Joi.object().keys({
+      avatar: Joi.string().uri({
+        scheme: ['http', 'https'],
+      }),
+    }),
+  }),
+  (req, res, next) => {
+    const id = req.user._id;
+    const { avatar } = req.body;
+
+    User.findByIdAndUpdate(
+      id,
+      { avatar },
+      {
+        new: true,
+        runValidators: true,
+      },
+    )
+      .then((user) => res.send(user))
+      .catch(next);
+  },
+];
 
 module.exports.login = [
   celebrate({

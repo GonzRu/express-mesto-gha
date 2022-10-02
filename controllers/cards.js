@@ -14,7 +14,9 @@ module.exports.createCard = [
   celebrate({
     body: Joi.object().keys({
       name: Joi.string().required().min(2).max(30),
-      link: Joi.string().required().min(2).uri(),
+      link: Joi.string().required().min(2).uri({
+        scheme: ['http', 'https'],
+      }),
     }),
   }),
   (req, res, next) => {
@@ -27,38 +29,59 @@ module.exports.createCard = [
   },
 ];
 
-module.exports.deleteCard = (req, res, next) => {
-  const { id } = req.params;
+module.exports.deleteCard = [
+  celebrate({
+    params: {
+      id: Joi.string().length(24),
+    },
+  }),
+  (req, res, next) => {
+    const { id } = req.params;
 
-  Card.findById(id)
-    .then((card) => {
-      if (!card) throw new NotFoundError();
-      if (card.owner.toString() !== req.user._id) throw new ForbiddenError();
+    Card.findById(id)
+      .then((card) => {
+        if (!card) throw new NotFoundError();
+        if (card.owner.toString() !== req.user._id) throw new ForbiddenError();
 
-      return Card
-        .remove(card)
-        .then(() => card);
-    })
-    .then((user) => responseHandler(user, res))
-    .catch(next);
-};
+        return Card
+          .remove(card)
+          .then(() => card);
+      })
+      .then((user) => responseHandler(user, res))
+      .catch(next);
+  },
+];
 
-module.exports.likeCard = (req, res, next) => {
-  Card.findByIdAndUpdate(
-    req.params.cardId,
-    { $addToSet: { likes: req.user._id } },
-    { new: true },
-  )
-    .then((user) => responseHandler(user, res))
-    .catch(next);
-};
+module.exports.likeCard = [
+  celebrate({
+    params: {
+      cardId: Joi.string().length(24),
+    },
+  }),
+  (req, res, next) => {
+    Card.findByIdAndUpdate(
+      req.params.cardId,
+      { $addToSet: { likes: req.user._id } },
+      { new: true },
+    )
+      .then((user) => responseHandler(user, res))
+      .catch(next);
+  },
+];
 
-module.exports.dislikeCard = (req, res, next) => {
-  Card.findByIdAndUpdate(
-    req.params.cardId,
-    { $pull: { likes: req.user._id } },
-    { new: true },
-  )
-    .then((user) => responseHandler(user, res))
-    .catch(next);
-};
+module.exports.dislikeCard = [
+  celebrate({
+    params: {
+      cardId: Joi.string().length(24),
+    },
+  }),
+  (req, res, next) => {
+    Card.findByIdAndUpdate(
+      req.params.cardId,
+      { $pull: { likes: req.user._id } },
+      { new: true },
+    )
+      .then((user) => responseHandler(user, res))
+      .catch(next);
+  },
+];
