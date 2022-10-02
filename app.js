@@ -7,7 +7,7 @@ const bodyParser = require('body-parser');
 const { errors } = require('celebrate');
 const { createUser, login } = require('./controllers/usres');
 
-const { PORT = 3001 } = process.env;
+const { PORT = 3000 } = process.env;
 
 process.on('uncaughtException', (err, origin) => {
   // eslint-disable-next-line no-console
