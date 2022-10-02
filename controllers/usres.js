@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const { celebrate, Joi } = require('celebrate');
 const User = require('../models/user');
 const responseHandler = require('../utils/responseHandler');
+const { jwtSign } = require('../utils/jwt');
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
@@ -97,11 +98,7 @@ module.exports.login = [
 
     User.findUserByCredentials(email, password)
       .then((user) => {
-        const token = jwt.sign(
-          { _id: user._id },
-          'some-secret-key',
-          { expiresIn: 3600 },
-        );
+        const token = jwtSign(user);
 
         return res
         // .cookie('jwt', token, { maxAge: 3600000 * 7, httpOnly: true, sameSite: true })
