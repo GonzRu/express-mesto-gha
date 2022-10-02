@@ -1,3 +1,4 @@
+const { celebrate, Joi } = require('celebrate');
 const Card = require('../models/card');
 const responseHandler = require('../utils/responseHandler');
 const NotFoundError = require('../errors/not-found-error');
@@ -9,14 +10,22 @@ module.exports.getCards = (req, res, next) => {
     .catch(next);
 };
 
-module.exports.createCard = (req, res, next) => {
-  const userId = req.user._id;
-  const { name, link } = req.body;
+module.exports.createCard = [
+  celebrate({
+    body: Joi.object().keys({
+      name: Joi.string().required().min(2).max(30),
+      link: Joi.string().required().min(2).uri(),
+    }),
+  }),
+  (req, res, next) => {
+    const userId = req.user._id;
+    const { name, link } = req.body;
 
-  Card.create({ name, link, owner: userId })
-    .then((card) => res.send(card))
-    .catch(next);
-};
+    Card.create({ name, link, owner: userId })
+      .then((card) => res.send(card))
+      .catch(next);
+  },
+];
 
 module.exports.deleteCard = (req, res, next) => {
   const { id } = req.params;
@@ -28,7 +37,7 @@ module.exports.deleteCard = (req, res, next) => {
 
       return Card
         .remove(card)
-        .then((_) => card);
+        .then(() => card);
     })
     .then((user) => responseHandler(user, res))
     .catch(next);

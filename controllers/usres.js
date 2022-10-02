@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { celebrate, Joi } = require('celebrate');
 const User = require('../models/user');
 const responseHandler = require('../utils/responseHandler');
 
@@ -17,22 +18,33 @@ module.exports.getUser = (req, res, next) => {
     .catch(next);
 };
 
-module.exports.createUser = (req, res, next) => {
-  const {
-    name = 'Жак-Ив Кусто',
-    about = 'Исследователь',
-    avatar = 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
-    email,
-    password,
-  } = req.body;
+module.exports.createUser = [
+  celebrate({
+    body: Joi.object().keys({
+      email: Joi.string().required().email(),
+      password: Joi.string().required().min(2),
+      name: Joi.string(),
+      about: Joi.string(),
+      avatar: Joi.string().uri(),
+    }),
+  }),
+  (req, res, next) => {
+    const {
+      name = 'Жак-Ив Кусто',
+      about = 'Исследователь',
+      avatar = 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
+      email,
+      password,
+    } = req.body;
 
-  bcrypt.hash(password, 10)
-    .then((hash) => User.create({
-      name, about, avatar, email, password: hash,
-    }))
-    .then((user) => res.send(user))
-    .catch(next);
-};
+    bcrypt.hash(password, 10)
+      .then((hash) => User.create({
+        name, about, avatar, email, password: hash,
+      }))
+      .then((user) => res.send(user))
+      .catch(next);
+  },
+];
 
 module.exports.getMe = (req, res, next) => {
   const id = req.user._id;
@@ -73,20 +85,28 @@ module.exports.updateAvatar = (req, res, next) => {
     .catch(next);
 };
 
-module.exports.login = (req, res, next) => {
-  const { email, password } = req.body;
+module.exports.login = [
+  celebrate({
+    body: Joi.object().keys({
+      email: Joi.string().required().email(),
+      password: Joi.string().required().min(2),
+    }),
+  }),
+  (req, res, next) => {
+    const { email, password } = req.body;
 
-  User.findUserByCredentials(email, password)
-    .then((user) => {
-      const token = jwt.sign(
-        { _id: user._id },
-        'some-secret-key',
-        { expiresIn: 3600 },
-      );
+    User.findUserByCredentials(email, password)
+      .then((user) => {
+        const token = jwt.sign(
+          { _id: user._id },
+          'some-secret-key',
+          { expiresIn: 3600 },
+        );
 
-      return res
+        return res
         // .cookie('jwt', token, { maxAge: 3600000 * 7, httpOnly: true, sameSite: true })
-        .send({ token });
-    })
-    .catch(next);
-};
+          .send({ token });
+      })
+      .catch(next);
+  },
+];
