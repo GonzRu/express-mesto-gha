@@ -1,5 +1,4 @@
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const { celebrate, Joi } = require('celebrate');
 const User = require('../models/user');
 const responseHandler = require('../utils/responseHandler');
