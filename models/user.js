@@ -32,20 +32,23 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-userSchema.statics.findUserByCredentials = (email, password) => this.findOne({ email }).select('+password')
-  .then((user) => {
-    if (!user) {
-      throw new WrongLoginOrPasswordError();
-    }
+// eslint-disable-next-line func-names
+userSchema.statics.findUserByCredentials = function (email, password) {
+  return this.findOne({ email }).select('+password')
+    .then((user) => {
+      if (!user) {
+        throw new WrongLoginOrPasswordError();
+      }
 
-    return bcrypt.compare(password, user.password)
-      .then((matched) => {
-        if (!matched) {
-          throw new WrongLoginOrPasswordError();
-        }
+      return bcrypt.compare(password, user.password)
+        .then((matched) => {
+          if (!matched) {
+            throw new WrongLoginOrPasswordError();
+          }
 
-        return user;
-      });
-  });
+          return user;
+        });
+    });
+};
 
 module.exports = mongoose.model('user', userSchema);
