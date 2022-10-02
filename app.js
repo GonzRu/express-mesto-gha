@@ -10,8 +10,8 @@ const { createUser, login } = require('./controllers/usres');
 const { PORT = 3001 } = process.env;
 
 process.on('uncaughtException', (err, origin) => {
-  console.log(err);
-  console.log(`${origin} ${err.name} c текстом ${err.message} не была обработана. Обратите внимание!`);
+  // eslint-disable-next-line no-console
+  console.log(`${origin} ${err.name} c текстом ${err.message} не была обработана.`);
 });
 
 const app = express();
