@@ -6,7 +6,7 @@ const cors = require('cors');
 const process = require('process');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
-const { errors } = require('celebrate');
+const { errors, celebrate, Joi } = require('celebrate');
 const { createUser, login } = require('./controllers/usres');
 
 const { PORT = 3000 } = process.env;
@@ -24,8 +24,31 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-app.post('/signup', createUser);
-app.post('/signin', login);
+app.post(
+  '/signup',
+  celebrate({
+    body: Joi.object().keys({
+      email: Joi.string().required().email(),
+      password: Joi.string().required().min(2),
+      name: Joi.string().min(2).max(30),
+      about: Joi.string().min(2).max(30),
+      avatar: Joi.string().uri({
+        scheme: ['http', 'https'],
+      }),
+    }),
+  }),
+  createUser,
+);
+app.post(
+  '/signin',
+  celebrate({
+    body: Joi.object().keys({
+      email: Joi.string().required().email(),
+      password: Joi.string().required().min(2),
+    }),
+  }),
+  login,
+);
 
 app.use(require('./midlewares/auth'));
 
