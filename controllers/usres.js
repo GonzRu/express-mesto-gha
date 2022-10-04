@@ -40,7 +40,7 @@ module.exports.createUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.code === 11000) {
-        next(EmailBusyError());
+        next(new EmailBusyError());
         return;
       }
 
