@@ -1,6 +1,6 @@
 class ForbiddenError extends Error {
-  constructor() {
-    super('Access forbidden');
+  constructor(message = 'Access forbidden') {
+    super(message);
     this.statusCode = 403;
   }
 }

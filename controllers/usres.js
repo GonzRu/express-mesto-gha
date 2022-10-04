@@ -3,6 +3,7 @@ const { celebrate, Joi } = require('celebrate');
 const User = require('../models/user');
 const responseHandler = require('../utils/responseHandler');
 const { jwtSign } = require('../utils/jwt');
+const EmailBusyError = require('../errors/email-busy-error');
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
@@ -59,7 +60,14 @@ module.exports.createUser = [
           email: user.email,
         });
       })
-      .catch(next);
+      .catch((err) => {
+        if (err.code === 11000) {
+          next(EmailBusyError());
+          return;
+        }
+
+        next(err);
+      });
   },
 ];
 

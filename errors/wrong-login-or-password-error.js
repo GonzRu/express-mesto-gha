@@ -1,6 +1,6 @@
 class WrongLoginOrPasswordError extends Error {
-  constructor() {
-    super('Неправильные почта или пароль');
+  constructor(message = 'Неправильные почта или пароль') {
+    super(message);
     this.statusCode = 401;
   }
 }
