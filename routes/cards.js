@@ -11,7 +11,7 @@ router.post(
   celebrate({
     body: Joi.object().keys({
       name: Joi.string().required().min(2).max(30),
-      avatar: Joi.string().custom(linkValidator),
+      link: Joi.string().custom(linkValidator),
     }),
   }),
   createCard,
