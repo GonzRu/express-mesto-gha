@@ -1,7 +1,9 @@
+const mongoose = require('mongoose');
 const Card = require('../models/card');
 const responseHandler = require('../utils/responseHandler');
 const NotFoundError = require('../errors/not-found-error');
 const ForbiddenError = require('../errors/forbidden-error');
+const ValidationError = require('../errors/validation-error');
 
 module.exports.getCards = (req, res, next) => Card.find({})
   .then((cards) => res.send(cards))
@@ -13,7 +15,13 @@ module.exports.createCard = (req, res, next) => {
 
   Card.create({ name, link, owner: userId })
     .then((card) => res.send(card))
-    .catch(next);
+    .catch((err) => {
+      if (err instanceof mongoose.Error.ValidationError) {
+        next(new ValidationError(err.message));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.deleteCard = (req, res, next) => {
@@ -29,7 +37,13 @@ module.exports.deleteCard = (req, res, next) => {
         .then(() => card);
     })
     .then((user) => responseHandler(user, res))
-    .catch(next);
+    .catch((err) => {
+      if (err instanceof mongoose.Error.CastError) {
+        next(new ValidationError(err.message));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.likeCard = (req, res, next) => Card.findByIdAndUpdate(
@@ -38,7 +52,13 @@ module.exports.likeCard = (req, res, next) => Card.findByIdAndUpdate(
   { new: true },
 )
   .then((user) => responseHandler(user, res))
-  .catch(next);
+  .catch((err) => {
+    if (err instanceof mongoose.Error.CastError) {
+      next(new ValidationError(err.message));
+    } else {
+      next(err);
+    }
+  });
 
 module.exports.dislikeCard = (req, res, next) => Card.findByIdAndUpdate(
   req.params.cardId,
@@ -46,4 +66,10 @@ module.exports.dislikeCard = (req, res, next) => Card.findByIdAndUpdate(
   { new: true },
 )
   .then((user) => responseHandler(user, res))
-  .catch(next);
+  .catch((err) => {
+    if (err instanceof mongoose.Error.CastError) {
+      next(new ValidationError(err.message));
+    } else {
+      next(err);
+    }
+  });

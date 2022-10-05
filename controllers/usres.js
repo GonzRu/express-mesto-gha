@@ -1,8 +1,10 @@
 const bcrypt = require('bcryptjs');
+const mongoose = require('mongoose');
 const User = require('../models/user');
 const responseHandler = require('../utils/responseHandler');
 const { jwtSign } = require('../utils/jwt');
 const EmailBusyError = require('../errors/email-busy-error');
+const ValidationError = require('../errors/validation-error');
 
 module.exports.getUsers = (req, res, next) => User.find({})
   .then((users) => res.send(users))
@@ -13,7 +15,13 @@ module.exports.getUser = (req, res, next) => {
 
   User.findById(id)
     .then((user) => responseHandler(user, res))
-    .catch(next);
+    .catch((err) => {
+      if (err instanceof mongoose.Error.CastError) {
+        next(new ValidationError(err.message));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.createUser = (req, res, next) => {
@@ -39,12 +47,13 @@ module.exports.createUser = (req, res, next) => {
       });
     })
     .catch((err) => {
-      if (err.code === 11000) {
+      if (err instanceof mongoose.Error.ValidationError) {
+        next(new ValidationError(err.message));
+      } else if (err.code === 11000) {
         next(new EmailBusyError());
-        return;
+      } else {
+        next(err);
       }
-
-      next(err);
     });
 };
 
@@ -68,7 +77,13 @@ module.exports.update = (req, res, next) => {
     },
   )
     .then((user) => res.send(user))
-    .catch(next);
+    .catch((err) => {
+      if (err instanceof mongoose.Error.ValidationError) {
+        next(new ValidationError(err.message));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.updateAvatar = (req, res, next) => {
@@ -84,7 +99,13 @@ module.exports.updateAvatar = (req, res, next) => {
     },
   )
     .then((user) => res.send(user))
-    .catch(next);
+    .catch((err) => {
+      if (err instanceof mongoose.Error.ValidationError) {
+        next(new ValidationError(err.message));
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.login = (req, res, next) => {
@@ -95,8 +116,13 @@ module.exports.login = (req, res, next) => {
       const token = jwtSign(user);
 
       return res
-        // .cookie('jwt', token, { maxAge: 3600000 * 7, httpOnly: true, sameSite: true })
         .send({ token });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err instanceof mongoose.Error.ValidationError) {
+        next(new ValidationError(err.message));
+      } else {
+        next(err);
+      }
+    });
 };

@@ -1,3 +1,5 @@
-module.exports = (req, res) => {
-  res.status(404).send({ message: 'Endpoint not found' });
+const NotFoundError = require('../errors/not-found-error');
+
+module.exports = (req, res, next) => {
+  next(new NotFoundError('Endpoint not found'));
 };

@@ -8,6 +8,7 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const { errors, celebrate, Joi } = require('celebrate');
 const { createUser, login } = require('./controllers/usres');
+const { linkValidator } = require('./utils/validators');
 
 const { PORT = 3000 } = process.env;
 
@@ -29,12 +30,10 @@ app.post(
   celebrate({
     body: Joi.object().keys({
       email: Joi.string().required().email(),
-      password: Joi.string().required().min(2),
+      password: Joi.string().required(),
       name: Joi.string().min(2).max(30),
       about: Joi.string().min(2).max(30),
-      avatar: Joi.string().uri({
-        scheme: ['http', 'https'],
-      }),
+      avatar: Joi.string().custom(linkValidator),
     }),
   }),
   createUser,
@@ -44,7 +43,7 @@ app.post(
   celebrate({
     body: Joi.object().keys({
       email: Joi.string().required().email(),
-      password: Joi.string().required().min(2),
+      password: Joi.string().required(),
     }),
   }),
   login,

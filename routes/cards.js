@@ -3,6 +3,7 @@ const { celebrate, Joi } = require('celebrate');
 const {
   getCards, createCard, deleteCard, likeCard, dislikeCard,
 } = require('../controllers/cards');
+const { linkValidator } = require('../utils/validators');
 
 router.get('/cards', getCards);
 router.post(
@@ -10,9 +11,7 @@ router.post(
   celebrate({
     body: Joi.object().keys({
       name: Joi.string().required().min(2).max(30),
-      link: Joi.string().required().min(2).uri({
-        scheme: ['http', 'https'],
-      }),
+      avatar: Joi.string().custom(linkValidator),
     }),
   }),
   createCard,
@@ -21,7 +20,7 @@ router.delete(
   '/cards/:id',
   celebrate({
     params: {
-      id: Joi.string().length(24),
+      id: Joi.string().hex().length(24),
     },
   }),
   deleteCard,
@@ -30,7 +29,7 @@ router.put(
   '/cards/:cardId/likes',
   celebrate({
     params: {
-      cardId: Joi.string().length(24),
+      cardId: Joi.string().hex().length(24),
     },
   }),
   likeCard,
@@ -39,7 +38,7 @@ router.delete(
   '/cards/:cardId/likes',
   celebrate({
     params: {
-      cardId: Joi.string().length(24),
+      cardId: Joi.string().hex().length(24),
     },
   }),
   dislikeCard,

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { linkValidator } = require('../utils/validators');
+const { linkRegExp } = require('../utils/validators');
 
 const cardSchema = new mongoose.Schema({
   name: {
@@ -11,7 +11,7 @@ const cardSchema = new mongoose.Schema({
   link: {
     type: String,
     required: true,
-    match: linkValidator,
+    match: linkRegExp,
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
